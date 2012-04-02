@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+import pygame
+from pygame import draw
+from random import randrange
+from pygame.locals import *
+
+char_x, char_y = 400,300
+char_dx, char_dy = 2,2
+
+def spawn_character(surf, pos, color=(255,0,255), size=40):
+    "Draws the character"
+    x,y = pos
+
+    width = size/8
+
+    draw.rect(surf, color, (x, y, width, size))
+
+def move(x, y, dx, dy, bounds):
+    x+=dx
+    y+=dy
+    if x<bounds.left or x>bounds.right-40:
+        dx*=-2
+        x+=dx*2
+    if x<bounds.top or y>bounds.bottom-40:
+        dy*=-2
+        y+=dy*2
+    return x, y, dx, dy
+
+pygame.init()
+screen = pygame.display.set_mode((800,600))
+clock = pygame.time.Clock()
+done = False
+screen_bounds=screen.get_rect()
+char = []
+color = []
+while not done:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            done = True
+        elif event.type == KEYDOWN and event.key == K_ESCAPE:
+            done = True
+
+    screen.fill((0,0,0))
+    char_x, char_y, char_dx, char_dy = char(char_x, char_y, char_dx, char_dy, screen_bounds)
+    char.append([char_x, char_y])
+    color.append(255)
+    if len(char) > 255:
+        ties.pop(0)
+        color.pop(0)
+    for i in range(len(char)):
+        color[i]-=1
+        draw_char(screen, char[i],(color[i],color[i],color[i]))
+    
+    pygame.display.flip()
+    clock.tick(60)
