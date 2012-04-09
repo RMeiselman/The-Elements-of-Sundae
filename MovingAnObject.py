@@ -1,104 +1,95 @@
 #!/usr/bin/env python
 
-try:
-    import sys, math, os, random
-    import pygame
-    from pygame.locals import *
+import pygame
+from pygame import *
+import random
 
-except ImportError, err:
-    print "%s Failed to load module: %s" % (__file__, err)
-    sys.exit(1)
+class Sprite:
+    def __init__ (self, xpos, ypos, filename):
+        self.x = xpos
+        self.y = ypos
+        self.bitmap = image.load(filename)
+        self.bitmap.set_colorkey((0,0,0))
+    def set_position(self, xpos, ypos):
+        self.x = xpos
+        self.y = ypos
+    def render(self):
+        screen.blit(self.bitmap, (self.x, self.y))
 
-class Squirtle(pygame.sprite.Sprite):
-    def __init__(self, xy):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("squirtle.jpeg")
-        self.rect = self.image.get_rect()
-        
-        self.rect.centerx, self.rect.centery = xy
-        
-        self.movementspeed = 5
-        
-        self.velocity = 0
+def Intersect(s1_x, s1_y, s2_x, s2_y):
+    if (s1_x > s2_x - 32) and (s1_x < s2_x + 32) and (s1_y > s2_y - 32) and (s1_y < s2_y + 32):
+        return 1
+    else:
+        return 0
 
-    def up(self):
-        self.velocity -= self.movementspeed
+init()
+screen = display.set_mode((640, 480))
+key.set_repeat(1,1)
+display.set_caption('Elements of Sundae :)')
+backdrop = image.load('backdrop.bmp')
+FPS = 30
 
-    def down(self):
-        self.velocity += self.movementspeed
+enemies = []
 
-    def move(self, dy):
-        if self.rect.bottom + dy > 400:
-            self.rect.bottom = 400
-        elif self.rect.top + dy < 0:
-            self.rect.top = 0
-        else:
-            self.rect.y += dy
+x = 0
 
-    def update(self):
-        self.move(self.velocity)
+for count in range(1):
+    enemies.append(Sprite(50 * x + 50, 50, 'Bulbasaur.jpeg'))
+    x += 1
+    
+hero = Sprite(580,430, 'squirtle.bmp')
+ourmissile = Sprite(0,480, 'icecreamsprite.gif')
 
-class Game(object):
+quit = 0
+enemyspeed = 3
 
-    def __init__(self):
+while quit == 0:
+    screen.blit(backdrop, (0, 0))
+    
+    for count in range(len(enemies)):
+        enemies[count].y += + enemyspeed
+        enemies[count].render()
 
-        pygame.init()
+    if enemies[len(enemies)-1].y > 479:
+        enemyspeed = -3
+        for count in range(len(enemies)):
+            enemies[count].x += 5
 
-        self.window = pygame.display.set_mode((800, 400))
+    if enemies[0].y < 10:
+        enemyspeed = 3
+        for count in range(len(enemies)):
+            enemies[count].x += 5
 
-        self.clock = pygame.time.Clock()
+    if ourmissile.y < 430 and ourmissile.y > 0:
+        ourmissile.render()
+        ourmissile.y -= 5
 
-        pygame.display.set_caption("Elements of Sundae - Vertical Slice #1")
+    for count in range(0, len(enemies)):
+        if Intersect(ourmissile.x, ourmissile.y, enemies[count].x, enemies[count].y):
+            del enemies[count]
+            break
 
-        pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
+    if len(enemies) == 0:
+        quit = 1
 
-        self.background = pygame.Surface((800,400))
-        self.background.fill((255,255,255))
+    
+    for ourevent in event.get():
+        if ourevent.type == QUIT:
+            quit = 1
+        if ourevent.type == KEYDOWN:
+            if ourevent.key == K_RIGHT and hero.x < 590:
+                hero.x += 5
+            if ourevent.key == K_LEFT and hero.x > 10:
+                hero.x -= 5
+            if ourevent.key == K_UP and hero.y < 430:
+                hero.y += 5
+            if ourevent.key == K_DOWN and hero.y > 10:
+                hero.y -= 5
+            if ourevent.key == K_SPACE:
+                ourmissile.x = hero.x
+                ourmissile.y = hero.y
 
-        self.sprites = pygame.sprite.RenderUpdates()
 
-        # creats squirtle, and adds to sprite group
-        self.squirtle = Squirtle((50,200))
-        self.sprites.add(self.squirtle)
-
-    def run(self):
-        print 'Starting Event Loop'
-
-        running = True
-
-        while running:
-
-            self.clock.tick(60)
-
-            running = self.handleEvents()
-
-            for sprite in self.sprites:
-                sprite.update
-
-            self.sprites.clear(self.window, self.background)
-            dirty = self.sprites.draw(self.window)
-
-            pygame.display.update(dirty)
-
-        print 'Quitting. Thanks for playing!'
-
-    def handleEvents(self):
-
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                done = True
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    done = True
-
-                if event.key == K_UP:
-                    self.squirtle.up(0, 6)
-
-                if event.key == K_DOWN:                ##### add in left and right if this works
-                    self.squirtle.down()
-        return True
-
-if __name__ == '__main__':
-    game = Game()
-    game.run()
-
+    hero.render()
+    display.update()
+    time.delay(5)
