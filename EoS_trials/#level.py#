@@ -13,7 +13,6 @@ class Level(object):
 
     def __init__(self, size):
         self.bounds = Rect((0,0), size)
-        self.bg = image.load("background.bmp")
 
     def background(self, surf):
         tw, th = self.bg.get_size()

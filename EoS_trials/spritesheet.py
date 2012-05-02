@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
 from resource import load_image
 
 class SpriteSheet(object):
-    def __init__(self, image, dimensions, colorkey =-1):
+    def __init__(self, image, dimensions, colorkey=-1):
         
         if type(image) is str:
             image = load_image(image)
@@ -20,7 +18,7 @@ class SpriteSheet(object):
 
         self._images = []
         for y in range(rows):
-            ros = []
+            row = []
             for x in range(cols):
                 row.append(image.subsurface((x*w, y*h, w, h)))
             self._images.append(row)

@@ -1,0 +1,46 @@
+from random import randrange
+
+from pygame import Surface
+from pygame.sprite import Sprite, Group
+
+from anim import Animation
+from spritesheet import SpriteSheet
+
+
+## Coin
+class Cookie(Sprite):
+    def __init__(self, loc):
+        Sprite.__init__(self)
+        self.bitmap = im
+
+        self.rect = self.image.get_rect()
+        self.rect.center = loc
+
+        
+
+class CookieGroup(Group):
+    spawn_rate = 3000   # ms
+
+    def __init__(self, bounds):
+        Group.__init__(self)
+
+        self.bounds = bounds
+        self.spawn_timer = 0
+
+    def spawn(self):
+        x = randrange(self.bounds.x, self.bounds.x + self.bounds.width)
+        y = randrange(self.bounds.y, self.bounds.y + self.bounds.height)
+
+        cookies = Cookies((x,y))
+        cookies.rect.clamp_ip(self.bounds)
+        self.add(cookies)
+
+    def update(self, dt):
+        Group.update(self, dt)
+    
+        # update the spawner
+        self.spawn_timer += dt
+        if self.spawn_timer >= self.spawn_rate:
+            self.spawn()
+            self.spawn_timer = 0
+
